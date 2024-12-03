@@ -1,6 +1,9 @@
+
+using RestApi.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using RestApi.Dtos;
 using RestApi.Exceptions;
+>>>>>>> main
 using RestApi.Infraestructure.Soap;
 using RestApi.Models;
 using RestApi.Repositories;
@@ -19,6 +22,10 @@ public class GroupService : IGroupService
         _userRepository = userRepository;
     }
 
+
+    public async Task<GroupUserModel> GetGroupByIdAsync(string id, CancellationToken cancellationToken)
+    {
+        var group = await _groupRepository.GetByIdAsync(id, cancellationToken);
     public async Task<GroupUserModel> CreateGroupAsync(string name, Guid[] users, int PageSize, int PageIndex, string orderBy, CancellationToken cancellationToken){
         if(users.Length == 0){
             throw new InvalidGroupRequestFormatException();
@@ -55,6 +62,7 @@ public class GroupService : IGroupService
     public async Task<GroupUserModel> GetGroupByIdAsync(string Id, CancellationToken cancellationToken)
     {
         var group = await _groupRepository.GetByIdAsync(Id, cancellationToken);
+>>>>>>> main
 
         if(group == null)
         {
@@ -71,11 +79,18 @@ public class GroupService : IGroupService
     
     public async Task<IEnumerable<GroupUserModel>> GetGroupsByNameAsync(string name, int pageIndex, int pageSize, string orderBy, CancellationToken cancellationToken)
     {
+        var groups = await _groupRepository.GetByNameAsync(name, cancellationToken);
+
+        var groupUserModels = await Task.WhenAll(groups.Select(async group => 
+        {
+            var users = await Task.WhenAll(group.Users.Select(userId => _userRepository.GetByIdAsync(userId, cancellationToken)));
+=======
         var groups = await _groupRepository.GetByNameAsync(name, pageIndex, pageSize, orderBy, cancellationToken);
 
         var groupUserModels = await Task.WhenAll(groups.Select(async group => 
         {
             var users = await Task.WhenAll(group.Users.Select(Id => _userRepository.GetByIdAsync(Id, cancellationToken)));
+>>>>>>> main
             return new GroupUserModel
             {
                 Id = group.Id,
@@ -97,7 +112,6 @@ public class GroupService : IGroupService
             .Take(pageSize)
             .ToList();
     }
-
     public async Task UpdateGroups(string id, string name, Guid[] users, CancellationToken cancellationToken){
         if (users.Length == 0){
             throw new InvalidGroupRequestFormatException();
